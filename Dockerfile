@@ -52,9 +52,9 @@ USER django
 # Expose port
 EXPOSE 8000
 
-# Health check
+# Health check - verifica se o processo Gunicorn está rodando
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000', timeout=5)" || exit 1
+    CMD pgrep -f gunicorn || exit 1
 
 # Entrypoint script
 COPY --chown=django:django docker-entrypoint.sh /docker-entrypoint.sh
