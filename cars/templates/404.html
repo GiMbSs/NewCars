@@ -1,0 +1,398 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Página Não Encontrada - NewCars{% endblock %}
+
+{% block meta_description %}A página ou veículo que você procura não foi encontrado. Volte ao catálogo e continue navegando.{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ===== Estilos da Página 404 ===== */
+    .error-container {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        margin-top: 70px;
+        background: var(--gradient-dark);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .error-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)" /></svg>');
+        opacity: 0.5;
+    }
+
+    .error-content {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        max-width: 800px;
+        animation: fadeInUp 0.8s ease;
+    }
+
+    .error-icon {
+        font-size: 8rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+        animation: bounce 2s infinite;
+        display: inline-block;
+    }
+
+    .error-code {
+        font-size: 10rem;
+        font-weight: bold;
+        color: var(--white);
+        line-height: 1;
+        margin-bottom: 1rem;
+        text-shadow: 0 4px 20px rgba(255, 107, 53, 0.5);
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    .error-title {
+        font-size: 2.5rem;
+        color: var(--white);
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .error-message {
+        font-size: 1.2rem;
+        color: var(--gray-light);
+        margin-bottom: 3rem;
+        line-height: 1.8;
+    }
+
+    .error-suggestions {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 3rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .error-suggestions h3 {
+        color: var(--white);
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .error-suggestions ul {
+        list-style: none;
+        padding: 0;
+        color: var(--gray-light);
+        text-align: left;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .error-suggestions li {
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        transition: var(--transition-fast);
+    }
+
+    .error-suggestions li:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateX(5px);
+    }
+
+    .error-suggestions li i {
+        color: var(--accent-color);
+        font-size: 1.2rem;
+    }
+
+    .error-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .error-btn {
+        padding: 1rem 2.5rem;
+        border-radius: 50px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        transition: var(--transition-fast);
+        font-size: 1.1rem;
+        box-shadow: var(--shadow-md);
+    }
+
+    .error-btn.primary {
+        background: var(--gradient-primary);
+        color: var(--white);
+    }
+
+    .error-btn.primary:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .error-btn.secondary {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        color: var(--white);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .error-btn.secondary:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-3px);
+    }
+
+    .floating-cars {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        overflow: hidden;
+    }
+
+    .floating-car {
+        position: absolute;
+        font-size: 3rem;
+        opacity: 0.1;
+        animation: float 20s infinite ease-in-out;
+    }
+
+    .floating-car:nth-child(1) {
+        top: 10%;
+        left: 10%;
+        animation-delay: 0s;
+    }
+
+    .floating-car:nth-child(2) {
+        top: 60%;
+        right: 10%;
+        animation-delay: 3s;
+    }
+
+    .floating-car:nth-child(3) {
+        bottom: 20%;
+        left: 20%;
+        animation-delay: 6s;
+    }
+
+    .floating-car:nth-child(4) {
+        top: 30%;
+        right: 25%;
+        animation-delay: 9s;
+    }
+
+    /* ===== Animações ===== */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-20px);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.8;
+            transform: scale(1.05);
+        }
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0) rotate(0deg);
+        }
+        25% {
+            transform: translateY(-30px) rotate(5deg);
+        }
+        50% {
+            transform: translateY(0) rotate(0deg);
+        }
+        75% {
+            transform: translateY(-15px) rotate(-5deg);
+        }
+    }
+
+    /* ===== Responsividade ===== */
+    @media (max-width: 768px) {
+        .error-code {
+            font-size: 6rem;
+        }
+
+        .error-icon {
+            font-size: 5rem;
+        }
+
+        .error-title {
+            font-size: 1.8rem;
+        }
+
+        .error-message {
+            font-size: 1rem;
+        }
+
+        .error-suggestions {
+            padding: 1.5rem;
+        }
+
+        .error-suggestions ul {
+            text-align: center;
+        }
+
+        .error-suggestions li {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .error-actions {
+            flex-direction: column;
+        }
+
+        .error-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .floating-car {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <!-- Carros flutuantes decorativos -->
+    <div class="floating-cars">
+        <div class="floating-car">🚗</div>
+        <div class="floating-car">🚙</div>
+        <div class="floating-car">🚕</div>
+        <div class="floating-car">🚘</div>
+    </div>
+
+    <div class="error-content">
+        <!-- Ícone -->
+        <div class="error-icon">
+            <i class="fas fa-car-crash"></i>
+        </div>
+
+        <!-- Código do erro -->
+        <div class="error-code">404</div>
+
+        <!-- Título -->
+        <h1 class="error-title">Oops! Veículo Não Encontrado</h1>
+
+        <!-- Mensagem -->
+        <p class="error-message">
+            Parece que o veículo que você está procurando saiu para um test drive e não voltou ainda! 
+            <br>
+            A página ou informação que você tentou acessar não existe ou foi removida.
+        </p>
+
+        <!-- Sugestões -->
+        <div class="error-suggestions">
+            <h3>
+                <i class="fas fa-lightbulb"></i>
+                O que você pode fazer:
+            </h3>
+            <ul>
+                <li>
+                    <i class="fas fa-search"></i>
+                    <span>Verifique se o endereço digitado está correto</span>
+                </li>
+                <li>
+                    <i class="fas fa-home"></i>
+                    <span>Volte para a página inicial e navegue novamente</span>
+                </li>
+                <li>
+                    <i class="fas fa-car"></i>
+                    <span>Confira nosso catálogo completo de veículos</span>
+                </li>
+                <li>
+                    <i class="fas fa-headset"></i>
+                    <span>Entre em contato com nossa equipe para ajuda</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Botões de ação -->
+        <div class="error-actions">
+            <a href="{% url 'home' %}" class="error-btn primary">
+                <i class="fas fa-home"></i>
+                Voltar ao Início
+            </a>
+            <a href="{% url 'list_cars' %}" class="error-btn secondary">
+                <i class="fas fa-car"></i>
+                Ver Catálogo
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Adiciona efeito parallax suave nos carros flutuantes
+    document.addEventListener('mousemove', (e) => {
+        const cars = document.querySelectorAll('.floating-car');
+        const mouseX = e.clientX / window.innerWidth;
+        const mouseY = e.clientY / window.innerHeight;
+
+        cars.forEach((car, index) => {
+            const speed = (index + 1) * 0.05;
+            const x = (mouseX - 0.5) * 50 * speed;
+            const y = (mouseY - 0.5) * 50 * speed;
+            
+            car.style.transform = `translate(${x}px, ${y}px)`;
+        });
+    });
+
+    // Animação de entrada escalonada para os itens da lista
+    document.addEventListener('DOMContentLoaded', () => {
+        const listItems = document.querySelectorAll('.error-suggestions li');
+        
+        listItems.forEach((item, index) => {
+            setTimeout(() => {
+                item.style.animation = 'fadeInUp 0.5s ease forwards';
+            }, index * 100);
+        });
+    });
+</script>
+{% endblock %}

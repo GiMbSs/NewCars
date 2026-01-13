@@ -1,0 +1,695 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+{% if 'editar' in request.path %}
+Atualizar dados do Veículo - NewCars
+{% else %}
+Cadastrar Novo Veículo - NewCars
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos específicos para a página de cadastro */
+    .page-header {
+        background: var(--gradient-dark);
+        padding: 8rem 2rem 4rem;
+        text-align: center;
+        color: var(--white);
+        margin-top: 70px;
+    }
+    
+    .page-header h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        animation: fadeInUp 0.8s ease;
+    }
+    
+    .page-header p {
+        font-size: 1.2rem;
+        color: var(--gray-light);
+        animation: fadeInUp 0.8s ease 0.2s both;
+    }
+    
+    .form-container {
+        max-width: 900px;
+        margin: -3rem auto 4rem;
+        background: var(--white);
+        border-radius: 16px;
+        box-shadow: var(--shadow-lg);
+        padding: 3rem;
+        position: relative;
+        z-index: 10;
+    }
+    
+    .form-section {
+        margin-bottom: 2.5rem;
+    }
+    
+    .form-section-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--dark);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 3px solid var(--primary-color);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .form-section-title i {
+        color: var(--primary-color);
+        font-size: 1.3rem;
+    }
+    
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+    
+    @media (max-width: 992px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--dark);
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-group label i {
+        color: var(--primary-color);
+        font-size: 0.9rem;
+    }
+    
+    .form-group label .required {
+        color: #e74c3c;
+        font-weight: bold;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 0.875rem;
+        border: 2px solid var(--gray-light);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: var(--transition-fast);
+        font-family: inherit;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+    }
+    
+    .form-group textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+    
+    .form-group input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        margin-right: 0.5rem;
+    }
+    
+    .checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 1.25rem;
+        background: var(--light);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: var(--transition-fast);
+        min-height: 58px;
+    }
+    
+    .checkbox-wrapper:hover {
+        background: #e8f4f8;
+    }
+    
+    .checkbox-wrapper label {
+        margin: 0;
+        cursor: pointer;
+        font-weight: 500;
+    }
+    
+    .file-upload-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+        width: 100%;
+    }
+    
+    .file-upload-wrapper input[type="file"] {
+        position: absolute;
+        left: -9999px;
+    }
+    
+    .file-upload-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 2rem;
+        border: 2px dashed var(--gray-light);
+        border-radius: 8px;
+        background: var(--light);
+        cursor: pointer;
+        transition: var(--transition-fast);
+        text-align: center;
+    }
+    
+    .file-upload-label:hover {
+        border-color: var(--primary-color);
+        background: #fff8f5;
+    }
+    
+    .file-upload-label i {
+        font-size: 2rem;
+        color: var(--primary-color);
+    }
+    
+    .file-upload-text {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .file-upload-text strong {
+        color: var(--dark);
+        font-size: 1.1rem;
+    }
+    
+    .file-upload-text span {
+        color: var(--gray);
+        font-size: 0.9rem;
+    }
+    
+    .image-preview {
+        margin-top: 1rem;
+        display: none;
+    }
+    
+    .image-preview.active {
+        display: block;
+    }
+    
+    .image-preview img {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 8px;
+        box-shadow: var(--shadow-md);
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid var(--gray-light);
+    }
+    
+    .btn-form {
+        padding: 1rem 2.5rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1.05rem;
+        cursor: pointer;
+        transition: var(--transition-fast);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-form.primary {
+        background: var(--gradient-primary);
+        color: var(--white);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .btn-form.primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .btn-form.secondary {
+        background: var(--gray-light);
+        color: var(--dark);
+    }
+    
+    .btn-form.secondary:hover {
+        background: var(--gray);
+        color: var(--white);
+    }
+    
+    .help-text {
+        font-size: 0.85rem;
+        color: var(--gray);
+        margin-top: 0.25rem;
+    }
+    
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0 0;
+    }
+    
+    .errorlist li {
+        color: #e74c3c;
+        font-size: 0.85rem;
+        padding: 0.5rem;
+        background: #ffe8e8;
+        border-radius: 4px;
+        margin-top: 0.25rem;
+    }
+    
+    .success-message {
+        background: #d4edda;
+        color: #155724;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .success-message i {
+        font-size: 1.5rem;
+    }
+    
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 2rem;
+        }
+        
+        .form-container {
+            padding: 2rem 1.5rem;
+            margin: -2rem 1rem 2rem;
+        }
+        
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .btn-form {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header">
+    {% if 'editar' in request.path %}
+    <h1>🚗 Atualizar Veículo</h1>
+    <p>Adicione, altere ou atualize os dados o veículo.</p>
+    {% else %}
+    <h1>🚗 Cadastrar Novo Veículo</h1>
+    <p>Informe os dados do veículo a ser cadastrado.</p>
+    {% endif %}
+</section>
+
+<div class="container">
+    <div class="form-container">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="success-message">
+                <i class="fas fa-check-circle"></i>
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        {% endif %}
+        
+        <form method="post" enctype="multipart/form-data" id="carForm">
+            {% csrf_token %}
+            
+            <!-- Informações Básicas -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <i class="fas fa-info-circle"></i>
+                    Informações Básicas
+                </h3>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="id_brand">
+                            <i class="fas fa-tag"></i>
+                            Marca
+                            <span class="required">*</span>
+                        </label>
+                        {{ form.brand }}
+                        {% if form.brand.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.brand.errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_model">
+                            <i class="fas fa-car"></i>
+                            Modelo
+                            <span class="required">*</span>
+                        </label>
+                        {{ form.model }}
+                        {% if form.model.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.model.errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_factory_year">
+                            <i class="fas fa-calendar-alt"></i>
+                            Ano de Fabricação
+                            <span class="required">*</span>
+                        </label>
+                        {{ form.factory_year }}
+                        {% if form.factory_year.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.factory_year.errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_model_year">
+                            <i class="fas fa-calendar-check"></i>
+                            Ano do Modelo
+                            <span class="required">*</span>
+                        </label>
+                        {{ form.model_year }}
+                        {% if form.model_year.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.model_year.errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_color">
+                            <i class="fas fa-palette"></i>
+                            Cor
+                            <span class="required">*</span>
+                        </label>
+                        {{ form.color }}
+                        {% if form.color.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.color.errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_transmission">
+                            <i class="fas fa-cog"></i>
+                            Transmissão
+                            <span class="required">*</span>
+                        </label>
+                        {{ form.transmission }}
+                        {% if form.transmission.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.transmission.errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Especificações Técnicas -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <i class="fas fa-cogs"></i>
+                    Especificações Técnicas
+                </h3>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="id_mileage">
+                            <i class="fas fa-tachometer-alt"></i>
+                            Quilometragem (km)
+                            <span class="required">*</span>
+                        </label>
+                        {{ form.mileage }}
+                        {% if form.mileage.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.mileage.errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_price">
+                            <i class="fas fa-dollar-sign"></i>
+                            Preço (R$)
+                            <span class="required">*</span>
+                        </label>
+                        {{ form.price }}
+                        {% if form.price.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.price.errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="id_description">
+                            <i class="fas fa-align-left"></i>
+                            Descrição
+                        </label>
+                        {{ form.description }}
+                        <span class="help-text">Adicione informações adicionais sobre o veículo (opcionais, equipamentos, histórico, etc.)</span>
+                        {% if form.description.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.description.errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Imagem e Status -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <i class="fas fa-image"></i>
+                    Imagem e Status
+                </h3>
+                
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="id_image">
+                            <i class="fas fa-camera"></i>
+                            Imagem do Veículo
+                        </label>
+                        <div class="file-upload-wrapper">
+                            {{ form.image }}
+                            <label for="id_image" class="file-upload-label">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <div class="file-upload-text">
+                                    <strong>Clique para fazer upload</strong>
+                                    <span>ou arraste e solte a imagem aqui</span>
+                                </div>
+                            </label>
+                        </div>
+                        <div id="imagePreview" class="image-preview">
+                            <img id="previewImg" src="" alt="Preview">
+                        </div>
+                        {% if form.image.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.image.errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="checkbox-wrapper">
+                            {{ form.is_available }}
+                            <label for="id_is_available">
+                                <i class="fas fa-check-circle"></i>
+                                Veículo Disponível para Venda
+                            </label>
+                        </div>
+                        {% if form.is_available.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.is_available.errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="checkbox-wrapper">
+                            {{ form.highlighted }}
+                            <label for="id_highlighted">
+                                <i class="fas fa-star"></i>
+                                Destacar no Catálogo
+                            </label>
+                        </div>
+                        {% if form.highlighted.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.highlighted.errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="checkbox-wrapper">
+                            {{ form.is_new }}
+                            <label for="id_is_new">
+                                <i class="fas fa-certificate"></i>
+                                Veículo Zero Km
+                            </label>
+                        </div>
+                        {% if form.is_new.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.is_new.errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="form-actions">
+                <a href="{% url 'list_cars' %}" class="btn-form secondary">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                </a>
+                <button type="submit" class="btn-form primary">
+                    <i class="fas fa-save"></i>
+                    {% if 'editar' in request.path %}
+                    Salvar Alterações
+                    {% else %}
+                    Cadastrar Veículo
+                    {% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Preview de imagem
+    document.getElementById('id_image').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const preview = document.getElementById('imagePreview');
+                const img = document.getElementById('previewImg');
+                img.src = event.target.result;
+                preview.classList.add('active');
+            };
+            reader.readAsDataURL(file);
+            
+            // Atualizar texto do label
+            const label = document.querySelector('.file-upload-label .file-upload-text strong');
+            label.textContent = file.name;
+        }
+    });
+    
+    // Validação do formulário
+    document.getElementById('carForm').addEventListener('submit', function(e) {
+        const requiredFields = this.querySelectorAll('[required]');
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.style.borderColor = '#e74c3c';
+            } else {
+                field.style.borderColor = '';
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('Por favor, preencha todos os campos obrigatórios (*)');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    });
+    
+    // Formatação do preço
+    const priceInput = document.getElementById('id_price');
+    if (priceInput) {
+        priceInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value) {
+                value = (parseInt(value) / 100).toFixed(2);
+                e.target.value = value;
+            }
+        });
+    }
+    
+    // Animação de entrada
+    document.querySelector('.form-container').style.opacity = '0';
+    document.querySelector('.form-container').style.transform = 'translateY(30px)';
+    
+    setTimeout(() => {
+        document.querySelector('.form-container').style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        document.querySelector('.form-container').style.opacity = '1';
+        document.querySelector('.form-container').style.transform = 'translateY(0)';
+    }, 100);
+</script>
+{% endblock %}

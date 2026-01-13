@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}NewCars - Encontre o Carro dos Seus Sonhos{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-content">
+        <h1 class="hero-title">Encontre o Carro dos Seus Sonhos</h1>
+        <p class="hero-subtitle">
+            As melhores ofertas em veículos seminovos com qualidade garantida
+        </p>
+        <div class="hero-buttons">
+            <a href="#catalogo" class="btn btn-primary">Ver Catálogo</a>
+            <a href="#contato" class="btn btn-secondary">Fale Conosco</a>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features" id="sobre">
+    <div class="container">
+        <h2 class="section-title">Por Que Escolher a NewCars?</h2>
+        <p class="section-subtitle">Compromisso com excelência e satisfação do cliente</p>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3 class="feature-title">Garantia de Qualidade</h3>
+                <p class="feature-description">
+                    Todos os veículos passam por rigorosa inspeção técnica e mecânica
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <h3 class="feature-title">Melhores Preços</h3>
+                <p class="feature-description">
+                    Ofertas competitivas e condições de pagamento facilitadas
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-handshake"></i>
+                </div>
+                <h3 class="feature-title">Atendimento Personalizado</h3>
+                <p class="feature-description">
+                    Equipe especializada para te ajudar a encontrar o veículo ideal
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-file-contract"></i>
+                </div>
+                <h3 class="feature-title">Documentação em Dia</h3>
+                <p class="feature-description">
+                    Toda a papelada resolvida para você, sem burocracia
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-exchange-alt"></i>
+                </div>
+                <h3 class="feature-title">Aceitamos Troca</h3>
+                <p class="feature-description">
+                    Avaliamos seu veículo usado na troca do novo
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <h3 class="feature-title">Financiamento Fácil</h3>
+                <p class="feature-description">
+                    Parcerias com os principais bancos para facilitar sua compra
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Cars Showcase Section -->
+<section class="cars-showcase" id="catalogo">
+    <div class="container">
+        <h2 class="section-title">Veículos em Destaque</h2>
+        <p class="section-subtitle">Confira nossas melhores ofertas</p>
+        <div class="cars-grid">
+            {% for car in cars %}
+            <div class="car-card">
+                <div class="car-image-container">
+                    <img src="{{ car.image.url }}" 
+                         alt="Carro" class="car-image">
+                    {% if car.is_new %}
+                    <span class="car-badge">Novo</span>
+                    {% else %}
+                    <span class="car-badge">Usado</span>
+                    {% endif %}
+                </div>
+                <div class="car-info">
+                    <h3 class="car-title">{{ car.name }}</h3>
+                    <div class="car-details">
+                        <span class="car-detail">
+                            <i class="fas fa-calendar"></i> {{ car.factory_year }}/{{ car.model_year }}
+                        </span>
+                        <span class="car-detail">
+                            <i class="fas fa-tachometer-alt"></i> {{ car.mileage }} km
+                        </span>
+                        <span class="car-detail">
+                            <i class="fas fa-cog"></i> {{ car.transmission }}
+                        </span>
+                    </div>
+                    <div class="car-price">R$ {{ car.price }}</div>
+                    <a href="{% url 'car_detail' car.id %}" class="btn btn-primary">Ver Detalhes</a>
+                </div>
+            </div>
+            
+            {% endfor %}
+        </div>
+        <!-- Botão Ver Todos os Carros -->
+        <div style="text-align: center; margin-top: 3rem;">
+            <a href="{% url 'list_cars' %}" class="btn btn-primary" style="font-size: 1.2rem; padding: 1.2rem 3rem;">
+                <i class="fas fa-car"></i> Ver Todos os Carros
+                <i class="fas fa-arrow-right" style="margin-left: 0.5rem;"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta" id="contato">
+    <div class="container">
+        <h2 class="cta-title">Pronto para Comprar seu Próximo Carro?</h2>
+        <p class="cta-description">
+            Entre em contato conosco e descubra as melhores condições
+        </p>
+        <div class="hero-buttons">
+            <a href="tel:1112345678" class="btn btn-primary">
+                <i class="fas fa-phone"></i> Ligar Agora
+            </a>
+            <a href="https://wa.me/5511123456789" class="btn btn-secondary" target="_blank">
+                <i class="fab fa-whatsapp"></i> WhatsApp
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

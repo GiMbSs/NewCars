@@ -1,0 +1,57 @@
+# Python/Django
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ambientes virtuais
+venv/
+.venv/
+
+# Logs e temporários
+*.log
+*.tmp
+*.temp
+logs/
+
+# Banco de dados local
+*.sqlite3
+db.sqlite3
+
+# Arquivos de mídia e estáticos gerados
+media/
+staticfiles/
+
+# Ferramentas/IDE
+.vscode/
+.idea/
+
+# Node/Front
+node_modules/
+dist/
+build/
+
+# Env
+.env
+.env.docker
+.env.local
+.env.production
+
+# Cache de testes/coverage
+.pytest_cache/
+.coverage
+.playwright-mcp
+.serena
+htmlcov/
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Backups
+backups/
+*.sql
+*.dump
+
+# OS
+.DS_Store
+Thumbs.db

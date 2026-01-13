@@ -1,0 +1,689 @@
+{% extends "base.html" %}
+{% block title %}Login - NewCars{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Auth Container Styles */
+    .auth-section {
+        min-height: calc(100vh - 140px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6rem 2rem 4rem;
+        background: linear-gradient(135deg, #f5f5f5 0%, #e9ecef 100%);
+    }
+
+    .auth-container {
+        max-width: 480px;
+        width: 100%;
+        background: var(--white);
+        padding: 3rem;
+        border-radius: 20px;
+        box-shadow: var(--shadow-lg);
+        animation: slideInUp 0.5s ease;
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .auth-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem;
+        background: var(--gradient-primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-glow);
+    }
+
+    .auth-icon i {
+        font-size: 2.5rem;
+        color: var(--white);
+    }
+
+    .auth-title {
+        font-size: 2rem;
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+    }
+
+    .auth-subtitle {
+        color: var(--gray);
+        font-size: 1rem;
+    }
+
+    /* Form Styles */
+    .auth-form {
+        margin-top: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--dark);
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.9rem 1.2rem;
+        border: 2px solid var(--gray-light);
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: var(--transition-fast);
+        background: var(--light);
+        font-family: var(--font-primary);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        background: var(--white);
+        box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+    }
+
+    .form-control::placeholder {
+        color: var(--gray);
+        opacity: 0.7;
+    }
+
+    .input-icon {
+        position: relative;
+    }
+
+    .input-icon i {
+        position: absolute;
+        right: 1.2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray);
+        font-size: 1.1rem;
+    }
+
+    .input-icon .form-control {
+        padding-right: 3rem;
+    }
+
+    /* Password Toggle */
+    .password-toggle {
+        position: absolute;
+        right: 1.2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray);
+        cursor: pointer;
+        transition: var(--transition-fast);
+        font-size: 1.1rem;
+    }
+
+    .password-toggle:hover {
+        color: var(--primary-color);
+    }
+
+    /* Remember Me & Forgot Password */
+    .form-options {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 1.5rem 0;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: var(--primary-color);
+    }
+
+    .checkbox-group label {
+        margin: 0;
+        font-weight: normal;
+        font-size: 0.95rem;
+        cursor: pointer;
+        color: var(--gray);
+    }
+
+    .forgot-password {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-size: 0.95rem;
+        font-weight: 600;
+        transition: var(--transition-fast);
+    }
+
+    .forgot-password:hover {
+        color: var(--secondary-color);
+        text-decoration: underline;
+    }
+
+    /* Error Messages */
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0;
+    }
+
+    .errorlist li {
+        color: #ff4757;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: rgba(255, 71, 87, 0.1);
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+    }
+
+    .errorlist li::before {
+        content: '\f06a';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+    }
+
+    /* Non-field Errors */
+    .non-field-errors {
+        margin-bottom: 1.5rem;
+    }
+
+    /* Messages */
+    .messages {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 1.5rem;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        animation: slideInDown 0.4s ease;
+    }
+
+    @keyframes slideInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .alert-success {
+        background: rgba(38, 222, 129, 0.1);
+        color: #0e6b35;
+        border: 2px solid rgba(38, 222, 129, 0.3);
+    }
+
+    .alert-error {
+        background: rgba(255, 71, 87, 0.1);
+        color: #d32f2f;
+        border: 2px solid rgba(255, 71, 87, 0.3);
+    }
+
+    .alert-warning {
+        background: rgba(255, 165, 2, 0.1);
+        color: #e67e00;
+        border: 2px solid rgba(255, 165, 2, 0.3);
+    }
+
+    .alert-info {
+        background: rgba(0, 78, 137, 0.1);
+        color: #004E89;
+        border: 2px solid rgba(0, 78, 137, 0.3);
+    }
+
+    /* Submit Button */
+    .btn-submit {
+        width: 100%;
+        padding: 1rem;
+        background: var(--gradient-primary);
+        color: var(--white);
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition-normal);
+        box-shadow: var(--shadow-md);
+        margin-top: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn-submit:active:not(:disabled) {
+        transform: translateY(0);
+    }
+
+    .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .btn-submit .loading {
+        display: none;
+    }
+
+    .btn-submit.loading .loading {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: var(--white);
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Divider */
+    .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 2rem 0;
+        color: var(--gray);
+    }
+
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid var(--gray-light);
+    }
+
+    .divider span {
+        padding: 0 1rem;
+        font-size: 0.9rem;
+    }
+
+    /* Social Login Buttons */
+    .social-login {
+        display: grid;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .btn-social {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 0.9rem;
+        border-radius: 12px;
+        border: 2px solid var(--gray-light);
+        background: var(--white);
+        color: var(--dark);
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: var(--transition-fast);
+    }
+
+    .btn-social:hover {
+        background: var(--light);
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .btn-social i {
+        font-size: 1.3rem;
+    }
+
+    .btn-google:hover {
+        border-color: #DB4437;
+        color: #DB4437;
+    }
+
+    .btn-facebook:hover {
+        border-color: #4267B2;
+        color: #4267B2;
+    }
+
+    /* Auth Footer */
+    .auth-footer {
+        text-align: center;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--gray-light);
+    }
+
+    .auth-footer p {
+        color: var(--gray);
+        margin-bottom: 1rem;
+    }
+
+    .auth-footer a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+        transition: var(--transition-fast);
+    }
+
+    .auth-footer a:hover {
+        color: var(--secondary-color);
+        text-decoration: underline;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .auth-section {
+            padding: 5rem 1rem 3rem;
+        }
+
+        .auth-container {
+            padding: 2rem 1.5rem;
+        }
+
+        .auth-title {
+            font-size: 1.75rem;
+        }
+
+        .auth-icon {
+            width: 70px;
+            height: 70px;
+        }
+
+        .auth-icon i {
+            font-size: 2rem;
+        }
+
+        .form-options {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .auth-container {
+            padding: 1.5rem 1rem;
+        }
+
+        .auth-title {
+            font-size: 1.5rem;
+        }
+
+        .form-control {
+            padding: 0.75rem 1rem;
+        }
+
+        .btn-submit {
+            padding: 0.875rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="auth-container">
+        <!-- Header -->
+        <div class="auth-header">
+            <div class="auth-icon">
+                <i class="fas fa-sign-in-alt"></i>
+            </div>
+            <h1 class="auth-title">Bem-vindo de Volta!</h1>
+            <p class="auth-subtitle">Faça login para acessar sua conta</p>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Non-field Errors -->
+        {% if form.non_field_errors %}
+        <div class="non-field-errors">
+            <ul class="errorlist">
+                {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Form -->
+        <form method="post" class="auth-form" id="loginForm">
+            {% csrf_token %}
+            
+            <!-- Username/Email Field -->
+            <div class="form-group">
+                <label for="id_username">
+                    Usuário ou E-mail
+                    <span style="color: var(--primary-color);">*</span>
+                </label>
+                <div class="input-icon">
+                    <input type="text" 
+                           name="username" 
+                           id="id_username"
+                           class="form-control" 
+                           placeholder="Digite seu usuário ou e-mail"
+                           value="{{ form.username.value|default:'' }}"
+                           required
+                           autofocus>
+                    <i class="fas fa-user"></i>
+                </div>
+                {% if form.username.errors %}
+                <ul class="errorlist">
+                    {% for error in form.username.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+
+            <!-- Password Field -->
+            <div class="form-group">
+                <label for="id_password">
+                    Senha
+                    <span style="color: var(--primary-color);">*</span>
+                </label>
+                <div class="input-icon">
+                    <input type="password" 
+                           name="password" 
+                           id="id_password"
+                           class="form-control" 
+                           placeholder="Digite sua senha"
+                           required>
+                    <i class="fas fa-eye password-toggle" id="togglePassword"></i>
+                </div>
+                {% if form.password.errors %}
+                <ul class="errorlist">
+                    {% for error in form.password.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+
+            <!-- Remember Me & Forgot Password -->
+            <div class="form-options">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="remember" name="remember">
+                    <label for="remember">Lembrar-me</label>
+                </div>
+                <a href="#" class="forgot-password">
+                    <i class="fas fa-key"></i> Esqueceu a senha?
+                </a>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn-submit" id="submitBtn">
+                <span class="btn-text">
+                    <i class="fas fa-sign-in-alt"></i> Entrar
+                </span>
+                <span class="loading"></span>
+            </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="divider">
+            <span>ou continue com</span>
+        </div>
+
+        <!-- Social Login -->
+        <div class="social-login">
+            <button type="button" class="btn-social btn-google">
+                <i class="fab fa-google"></i>
+                Continuar com Google
+            </button>
+            <button type="button" class="btn-social btn-facebook">
+                <i class="fab fa-facebook-f"></i>
+                Continuar com Facebook
+            </button>
+        </div>
+
+        <!-- Footer -->
+        <div class="auth-footer">
+            <p>Ainda não possui uma conta?</p>
+            <a href="{% url 'register' %}">
+                <i class="fas fa-user-plus"></i> Cadastre-se Gratuitamente
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Password Toggle
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('id_password');
+
+        if (togglePassword && passwordInput) {
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                
+                // Toggle icon
+                this.classList.toggle('fa-eye');
+                this.classList.toggle('fa-eye-slash');
+            });
+        }
+
+        // Form Submit Loading State
+        const loginForm = document.getElementById('loginForm');
+        const submitBtn = document.getElementById('submitBtn');
+
+        if (loginForm && submitBtn) {
+            loginForm.addEventListener('submit', function(e) {
+                // Add loading state
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+                
+                // Optionally prevent actual submission for demo
+                // e.preventDefault();
+            });
+        }
+
+        // Auto-hide messages after 5 seconds
+        const messages = document.querySelectorAll('.alert');
+        messages.forEach(function(message) {
+            setTimeout(function() {
+                message.style.transition = 'opacity 0.5s ease';
+                message.style.opacity = '0';
+                setTimeout(function() {
+                    message.remove();
+                }, 500);
+            }, 5000);
+        });
+
+        // Remember Me functionality (from localStorage)
+        const rememberCheckbox = document.getElementById('remember');
+        const usernameInput = document.getElementById('id_username');
+
+        // Load saved username if exists
+        if (rememberCheckbox && usernameInput) {
+            const savedUsername = localStorage.getItem('rememberedUsername');
+            if (savedUsername) {
+                usernameInput.value = savedUsername;
+                rememberCheckbox.checked = true;
+            }
+
+            // Save username on form submit if remember is checked
+            loginForm.addEventListener('submit', function() {
+                if (rememberCheckbox.checked) {
+                    localStorage.setItem('rememberedUsername', usernameInput.value);
+                } else {
+                    localStorage.removeItem('rememberedUsername');
+                }
+            });
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Enter key to submit (if not already focused on submit button)
+            if (e.key === 'Enter' && document.activeElement !== submitBtn) {
+                const activeElement = document.activeElement;
+                if (activeElement.tagName === 'INPUT') {
+                    e.preventDefault();
+                    loginForm.submit();
+                }
+            }
+        });
+
+        // Social login button handlers (placeholder)
+        const socialButtons = document.querySelectorAll('.btn-social');
+        socialButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const provider = this.classList.contains('btn-google') ? 'Google' : 'Facebook';
+                alert(`Login com ${provider} será implementado em breve!`);
+            });
+        });
+    });
+</script>
+{% endblock %}

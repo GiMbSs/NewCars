@@ -1,0 +1,686 @@
+<nav class="navbar" id="navbar">
+    <div class="navbar-container">
+        <a href="{% url 'home' %}" class="navbar-logo">
+            <span class="icon">🚗</span>
+            <span>NewCars</span>
+        </a>
+        
+        <ul class="navbar-menu" id="navbarMenu">
+            <li><a href="{% url 'home' %}">Início</a></li>
+            {% if request.path == "/" %}
+            <li><a href="#catalogo">Catálogo</a></li>
+            {% else %}
+            <li><a href="{% url 'list_cars' %}">Catálogo</a></li>
+            {% endif %}
+            <li><a href="#sobre">Sobre</a></li>
+            <li><a href="#contato">Contato</a></li>
+            
+            {% if user.is_authenticated %}
+            {% if not user.is_staff %}
+                <li><a href="#" class="btn-primary">Vender Meu Carro</a></li>
+            {% endif %}
+                
+                <!-- User Menu Dropdown -->
+                <li class="nav-user-menu">
+                    <div class="nav-user-trigger" id="userMenuTrigger">
+                        <div class="nav-user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span class="nav-user-name">{{ user.username }}</span>
+                        <i class="fas fa-chevron-down nav-user-arrow"></i>
+                    </div>
+                    
+                    <div class="nav-user-dropdown" id="userDropdown">
+                        <div class="nav-user-info">
+                            <div class="nav-user-avatar-large">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="nav-user-details">
+                                <span class="nav-user-fullname">{{ user.get_full_name|default:user.username }}</span>
+                                <span class="nav-user-email">{{ user.email }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="nav-user-divider"></div>
+                        
+                        <ul class="nav-user-links">
+                            <li>
+                                <a href="#">
+                                    <i class="fas fa-user-circle"></i>
+                                    <span>Meu Perfil</span>
+                                </a>
+                            </li>
+                            {% if not user.is_staff %}
+                            <li>
+                                <a href="#">
+                                    <i class="fas fa-car"></i>
+                                    <span>Meus Anúncios</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#">
+                                    <i class="fas fa-heart"></i>
+                                    <span>Favoritos</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            {% if user.is_staff %}
+                            <li>
+                                <a href="{% url 'admin:index' %}">
+                                    <i class="fas fa-tools"></i>
+                                    <span>Administração</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'create_car' %}">
+                                    <i class="fa-solid fa-car-rear"></i>
+                                    <span>Cadastrar Carro</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'logs' %}">
+                                    <i class="fa-solid fa-file-lines"></i>
+                                    <span>Logs do Sistema</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            <li>
+                                <a href="#">
+                                    <i class="fas fa-cog"></i>
+                                    <span>Configurações</span>
+                                </a>
+                            </li>
+                        </ul>
+                        
+                        <div class="nav-user-divider"></div>
+                        
+                        <div class="nav-user-logout">
+                            <button type="button" class="btn-logout" id="logoutBtn">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Sair</span>
+                            </button>
+                        </div>
+                    </div>
+                </li>
+            {% else %}
+                <!-- Auth Buttons for Not Logged In Users -->
+                <li class="nav-auth-buttons">
+                    <a href="{% url 'login' %}" class="btn-login">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Entrar</span>
+                    </a>
+                </li>
+                <li class="nav-auth-buttons">
+                    <a href="{% url 'register' %}" class="btn-register">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Cadastrar</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+        
+        <div class="navbar-toggle" id="navbarToggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+</nav>
+
+<!-- Logout Confirmation Modal -->
+{% if user.is_authenticated %}
+<div class="logout-modal-overlay" id="logoutModal">
+    <div class="logout-modal">
+        <div class="logout-modal-icon">
+            <i class="fas fa-sign-out-alt"></i>
+        </div>
+        <h3 class="logout-modal-title">Confirmar Saída</h3>
+        <p class="logout-modal-text">Tem certeza que deseja sair da sua conta?</p>
+        
+        <div class="logout-modal-actions">
+            <button type="button" class="btn-cancel" id="cancelLogout">
+                <i class="fas fa-times"></i>
+                Cancelar
+            </button>
+            <form method="post" action="{% url 'logout' %}" style="display: inline;" id="logoutForm">
+                {% csrf_token %}
+                <button type="submit" class="btn-confirm" id="confirmLogout">
+                    <i class="fas fa-check"></i>
+                    Sim, Sair
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<style>
+    /* User Menu Styles */
+    .nav-user-menu {
+        position: relative;
+    }
+
+    .nav-user-trigger {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50px;
+        cursor: pointer;
+        transition: var(--transition-fast);
+        border: 2px solid transparent;
+    }
+
+    .nav-user-trigger:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .nav-user-avatar {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: var(--gradient-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white);
+        font-size: 1rem;
+    }
+
+    .nav-user-name {
+        color: var(--white);
+        font-weight: 600;
+        font-size: 0.95rem;
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .nav-user-arrow {
+        color: var(--white);
+        font-size: 0.8rem;
+        transition: var(--transition-fast);
+    }
+
+    .nav-user-menu.active .nav-user-arrow {
+        transform: rotate(180deg);
+    }
+
+    /* User Dropdown */
+    .nav-user-dropdown {
+        position: absolute;
+        top: calc(100% + 1rem);
+        right: 0;
+        width: 300px;
+        background: var(--white);
+        border-radius: 16px;
+        box-shadow: var(--shadow-lg);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all var(--transition-fast);
+        z-index: 1001;
+        overflow: hidden;
+    }
+
+    .nav-user-menu.active .nav-user-dropdown {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    /* User Info Section */
+    .nav-user-info {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .nav-user-avatar-large {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--gradient-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white);
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .nav-user-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        overflow: hidden;
+    }
+
+    .nav-user-fullname {
+        font-weight: 600;
+        color: var(--dark);
+        font-size: 1rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .nav-user-email {
+        font-size: 0.85rem;
+        color: var(--gray);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .nav-user-divider {
+        height: 1px;
+        background: var(--gray-light);
+        margin: 0.5rem 0;
+    }
+
+    /* User Links */
+    .nav-user-links {
+        list-style: none;
+        padding: 0.5rem 0;
+    }
+
+    .nav-user-links li a {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1.5rem;
+        color: var(--dark);
+        text-decoration: none;
+        transition: var(--transition-fast);
+        font-size: 0.95rem;
+    }
+
+    .nav-user-links li a:hover {
+        background: var(--light);
+        color: var(--primary-color);
+    }
+
+    .nav-user-links li a i {
+        width: 20px;
+        text-align: center;
+        font-size: 1.1rem;
+    }
+
+    /* Logout Button */
+    .nav-user-logout {
+        padding: 1rem 1.5rem;
+    }
+
+    .btn-logout {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+        padding: 0.75rem;
+        background: rgba(255, 71, 87, 0.1);
+        color: #d32f2f;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: var(--transition-fast);
+        border: 2px solid transparent;
+        cursor: pointer;
+        font-size: 0.95rem;
+        font-family: var(--font-primary);
+    }
+
+    .btn-logout:hover {
+        background: #d32f2f;
+        color: var(--white);
+        border-color: #d32f2f;
+        transform: translateY(-1px);
+    }
+
+    /* Logout Modal */
+    .logout-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        opacity: 0;
+        visibility: hidden;
+        transition: all var(--transition-normal);
+    }
+
+    .logout-modal-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .logout-modal {
+        background: var(--white);
+        border-radius: 20px;
+        padding: 2.5rem;
+        max-width: 420px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        transform: scale(0.9) translateY(20px);
+        transition: all var(--transition-normal);
+        text-align: center;
+    }
+
+    .logout-modal-overlay.show .logout-modal {
+        transform: scale(1) translateY(0);
+    }
+
+    .logout-modal-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem;
+        background: linear-gradient(135deg, #ff4757 0%, #d32f2f 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.4);
+        }
+        50% {
+            transform: scale(1.05);
+            box-shadow: 0 0 0 20px rgba(255, 71, 87, 0);
+        }
+    }
+
+    .logout-modal-icon i {
+        font-size: 2.5rem;
+        color: var(--white);
+    }
+
+    .logout-modal-title {
+        font-size: 1.75rem;
+        color: var(--dark);
+        margin-bottom: 0.75rem;
+        font-weight: bold;
+    }
+
+    .logout-modal-text {
+        font-size: 1.05rem;
+        color: var(--gray);
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+
+    .logout-modal-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .btn-cancel,
+    .btn-confirm {
+        flex: 1;
+        padding: 0.9rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: var(--transition-fast);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border: 2px solid;
+        font-family: var(--font-primary);
+    }
+
+    .btn-cancel {
+        background: var(--white);
+        color: var(--gray);
+        border-color: var(--gray-light);
+    }
+
+    .btn-cancel:hover {
+        background: var(--light);
+        border-color: var(--gray);
+        color: var(--dark);
+        transform: translateY(-2px);
+    }
+
+    .btn-confirm {
+        background: linear-gradient(135deg, #ff4757 0%, #d32f2f 100%);
+        color: var(--white);
+        border-color: transparent;
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-confirm:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn-confirm:active,
+    .btn-cancel:active {
+        transform: translateY(0);
+    }
+
+    /* Responsive Modal */
+    @media (max-width: 480px) {
+        .logout-modal {
+            padding: 2rem 1.5rem;
+        }
+
+        .logout-modal-title {
+            font-size: 1.5rem;
+        }
+
+        .logout-modal-text {
+            font-size: 1rem;
+        }
+
+        .logout-modal-actions {
+            flex-direction: column;
+        }
+
+        .btn-cancel,
+        .btn-confirm {
+            width: 100%;
+        }
+    }
+
+    /* Auth Buttons */
+    .nav-auth-buttons {
+        display: flex;
+        align-items: center;
+    }
+
+    .btn-login,
+    .btn-register {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.5rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: var(--transition-fast);
+        white-space: nowrap;
+    }
+
+    .btn-login {
+        color: var(--white);
+        border: 2px solid var(--white);
+        background: transparent;
+    }
+
+    .btn-login:hover {
+        background: var(--white);
+        color: var(--dark);
+    }
+
+    .btn-register {
+        background: var(--gradient-primary);
+        color: var(--white);
+        border: 2px solid transparent;
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+        .nav-user-trigger {
+            padding: 0.4rem 0.8rem;
+        }
+
+        .nav-user-name {
+            display: none;
+        }
+
+        .nav-user-arrow {
+            display: none;
+        }
+
+        .nav-user-dropdown {
+            position: fixed;
+            top: 70px;
+            right: 1rem;
+            left: 1rem;
+            width: auto;
+        }
+
+        .navbar-menu.active .nav-user-menu {
+            width: 100%;
+        }
+
+        .navbar-menu.active .nav-user-trigger {
+            width: 100%;
+            justify-content: flex-start;
+            border-radius: 12px;
+        }
+
+        .navbar-menu.active .nav-user-name {
+            display: block;
+        }
+
+        .navbar-menu.active .nav-user-arrow {
+            display: block;
+            margin-left: auto;
+        }
+
+        .btn-login,
+        .btn-register {
+            width: 100%;
+            justify-content: center;
+            margin: 0.5rem 0;
+        }
+
+        .nav-auth-buttons {
+            width: 100%;
+        }
+    }
+</style>
+
+<script>
+    // User Menu Dropdown Toggle
+    document.addEventListener('DOMContentLoaded', function() {
+        const userMenuTrigger = document.getElementById('userMenuTrigger');
+        const userMenu = document.querySelector('.nav-user-menu');
+        const userDropdown = document.getElementById('userDropdown');
+
+        if (userMenuTrigger && userMenu) {
+            userMenuTrigger.addEventListener('click', function(e) {
+                e.stopPropagation();
+                userMenu.classList.toggle('active');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!userMenu.contains(e.target)) {
+                    userMenu.classList.remove('active');
+                }
+            });
+
+            // Prevent dropdown from closing when clicking inside
+            if (userDropdown) {
+                userDropdown.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
+        }
+
+        // Close dropdown when pressing Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && userMenu) {
+                userMenu.classList.remove('active');
+            }
+        });
+
+        // Logout Modal Functionality
+        const logoutBtn = document.getElementById('logoutBtn');
+        const logoutModal = document.getElementById('logoutModal');
+        const cancelLogoutBtn = document.getElementById('cancelLogout');
+        const confirmLogoutBtn = document.getElementById('confirmLogout');
+
+        if (logoutBtn && logoutModal) {
+            // Show modal
+            logoutBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                logoutModal.classList.add('show');
+                document.body.style.overflow = 'hidden'; // Prevent scroll
+            });
+
+            // Cancel logout
+            if (cancelLogoutBtn) {
+                cancelLogoutBtn.addEventListener('click', function() {
+                    logoutModal.classList.remove('show');
+                    document.body.style.overflow = ''; // Restore scroll
+                });
+            }
+
+            // Close modal on overlay click
+            logoutModal.addEventListener('click', function(e) {
+                if (e.target === logoutModal) {
+                    logoutModal.classList.remove('show');
+                    document.body.style.overflow = '';
+                }
+            });
+
+            // Close modal on Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && logoutModal.classList.contains('show')) {
+                    logoutModal.classList.remove('show');
+                    document.body.style.overflow = '';
+                }
+            });
+
+            // Add loading state to confirm button
+            const logoutForm = document.getElementById('logoutForm');
+            if (logoutForm && confirmLogoutBtn) {
+                logoutForm.addEventListener('submit', function(e) {
+                    // Don't prevent default - let the form submit
+                    confirmLogoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saindo...';
+                    confirmLogoutBtn.disabled = true;
+                });
+            }
+        }
+    });
+</script>

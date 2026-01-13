@@ -1,0 +1,553 @@
+{% extends "base.html" %}
+{% block title %}Cadastro - NewCars{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Auth Container Styles */
+    .auth-section {
+        min-height: calc(100vh - 140px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6rem 2rem 4rem;
+        background: linear-gradient(135deg, #f5f5f5 0%, #e9ecef 100%);
+    }
+
+    .auth-container {
+        max-width: 500px;
+        width: 100%;
+        background: var(--white);
+        padding: 3rem;
+        border-radius: 20px;
+        box-shadow: var(--shadow-lg);
+        animation: slideInUp 0.5s ease;
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .auth-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem;
+        background: var(--gradient-primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-glow);
+    }
+
+    .auth-icon i {
+        font-size: 2.5rem;
+        color: var(--white);
+    }
+
+    .auth-title {
+        font-size: 2rem;
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+    }
+
+    .auth-subtitle {
+        color: var(--gray);
+        font-size: 1rem;
+    }
+
+    /* Form Styles */
+    .auth-form {
+        margin-top: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--dark);
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.9rem 1.2rem;
+        border: 2px solid var(--gray-light);
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: var(--transition-fast);
+        background: var(--light);
+        font-family: var(--font-primary);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        background: var(--white);
+        box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+    }
+
+    .form-control::placeholder {
+        color: var(--gray);
+        opacity: 0.7;
+    }
+
+    .input-icon {
+        position: relative;
+    }
+
+    .input-icon i {
+        position: absolute;
+        right: 1.2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray);
+        font-size: 1.1rem;
+    }
+
+    .input-icon .form-control {
+        padding-right: 3rem;
+    }
+
+    /* Password Strength Indicator */
+    .password-strength {
+        height: 4px;
+        border-radius: 2px;
+        margin-top: 0.5rem;
+        background: var(--gray-light);
+        overflow: hidden;
+        display: none;
+    }
+
+    .password-strength-bar {
+        height: 100%;
+        width: 0;
+        transition: all 0.3s ease;
+        border-radius: 2px;
+    }
+
+    .password-strength.show {
+        display: block;
+    }
+
+    .strength-weak { background: #ff4757; width: 33%; }
+    .strength-medium { background: #ffa502; width: 66%; }
+    .strength-strong { background: #26de81; width: 100%; }
+
+    /* Help Text */
+    .help-text {
+        font-size: 0.85rem;
+        color: var(--gray);
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: start;
+        gap: 0.5rem;
+    }
+
+    .help-text i {
+        margin-top: 0.15rem;
+        font-size: 0.9rem;
+    }
+
+    /* Error Messages */
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0;
+    }
+
+    .errorlist li {
+        color: #ff4757;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: rgba(255, 71, 87, 0.1);
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+    }
+
+    .errorlist li::before {
+        content: '\f06a';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+    }
+
+    /* Success Messages */
+    .messages {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 1.5rem;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .alert-success {
+        background: rgba(38, 222, 129, 0.1);
+        color: #0e6b35;
+        border: 2px solid rgba(38, 222, 129, 0.3);
+    }
+
+    .alert-error {
+        background: rgba(255, 71, 87, 0.1);
+        color: #d32f2f;
+        border: 2px solid rgba(255, 71, 87, 0.3);
+    }
+
+    /* Submit Button */
+    .btn-submit {
+        width: 100%;
+        padding: 1rem;
+        background: var(--gradient-primary);
+        color: var(--white);
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition-normal);
+        box-shadow: var(--shadow-md);
+        margin-top: 1rem;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn-submit:active {
+        transform: translateY(0);
+    }
+
+    .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Divider */
+    .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 2rem 0;
+        color: var(--gray);
+    }
+
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid var(--gray-light);
+    }
+
+    .divider span {
+        padding: 0 1rem;
+        font-size: 0.9rem;
+    }
+
+    /* Auth Footer */
+    .auth-footer {
+        text-align: center;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--gray-light);
+    }
+
+    .auth-footer p {
+        color: var(--gray);
+        margin-bottom: 1rem;
+    }
+
+    .auth-footer a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+        transition: var(--transition-fast);
+    }
+
+    .auth-footer a:hover {
+        color: var(--secondary-color);
+        text-decoration: underline;
+    }
+
+    /* Checkbox Styles */
+    .checkbox-group {
+        display: flex;
+        align-items: start;
+        gap: 0.75rem;
+        margin: 1rem 0;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        margin-top: 0.2rem;
+        cursor: pointer;
+        accent-color: var(--primary-color);
+    }
+
+    .checkbox-group label {
+        margin: 0;
+        font-weight: normal;
+        font-size: 0.95rem;
+        cursor: pointer;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .auth-section {
+            padding: 5rem 1rem 3rem;
+        }
+
+        .auth-container {
+            padding: 2rem 1.5rem;
+        }
+
+        .auth-title {
+            font-size: 1.75rem;
+        }
+
+        .auth-icon {
+            width: 70px;
+            height: 70px;
+        }
+
+        .auth-icon i {
+            font-size: 2rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .auth-container {
+            padding: 1.5rem 1rem;
+        }
+
+        .auth-title {
+            font-size: 1.5rem;
+        }
+
+        .form-control {
+            padding: 0.75rem 1rem;
+        }
+
+        .btn-submit {
+            padding: 0.875rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="auth-container">
+        <!-- Header -->
+        <div class="auth-header">
+            <div class="auth-icon">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <h1 class="auth-title">Criar Conta</h1>
+            <p class="auth-subtitle">Preencha os dados abaixo para se cadastrar</p>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i>
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Form -->
+        <form method="post" class="auth-form" id="registerForm">
+            {% csrf_token %}
+            
+            {% for field in user_form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                    {% if field.field.required %}
+                    <span style="color: var(--primary-color);">*</span>
+                    {% endif %}
+                </label>
+                
+                <div class="input-icon">
+                    {% if field.name == 'username' %}
+                        <input type="text" 
+                               name="{{ field.name }}" 
+                               id="{{ field.id_for_label }}"
+                               class="form-control" 
+                               placeholder="Digite seu nome de usuário"
+                               value="{{ field.value|default:'' }}"
+                               {% if field.field.required %}required{% endif %}>
+                        <i class="fas fa-user"></i>
+                    {% elif field.name == 'email' %}
+                        <input type="email" 
+                               name="{{ field.name }}" 
+                               id="{{ field.id_for_label }}"
+                               class="form-control" 
+                               placeholder="seu@email.com"
+                               value="{{ field.value|default:'' }}"
+                               {% if field.field.required %}required{% endif %}>
+                        <i class="fas fa-envelope"></i>
+                    {% elif 'password' in field.name %}
+                        <input type="password" 
+                               name="{{ field.name }}" 
+                               id="{{ field.id_for_label }}"
+                               class="form-control password-input" 
+                               placeholder="Digite sua senha"
+                               {% if field.field.required %}required{% endif %}>
+                        <i class="fas fa-lock"></i>
+                        {% if field.name == 'password1' %}
+                        <div class="password-strength" id="passwordStrength">
+                            <div class="password-strength-bar"></div>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        {{ field }}
+                    {% endif %}
+                </div>
+
+                <!-- Help Text -->
+                {% if field.help_text %}
+                <div class="help-text">
+                    <i class="fas fa-info-circle"></i>
+                    <span>{{ field.help_text|safe }}</span>
+                </div>
+                {% endif %}
+
+                <!-- Errors -->
+                {% if field.errors %}
+                <ul class="errorlist">
+                    {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <!-- Terms and Conditions -->
+            <div class="checkbox-group">
+                <input type="checkbox" id="terms" name="terms" required>
+                <label for="terms">
+                    Eu aceito os <a href="#" style="color: var(--primary-color);">Termos de Uso</a> 
+                    e a <a href="#" style="color: var(--primary-color);">Política de Privacidade</a>
+                </label>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-user-check"></i> Criar Minha Conta
+            </button>
+        </form>
+
+        <!-- Footer -->
+        <div class="auth-footer">
+            <p>Já possui uma conta?</p>
+            <a href="{% url 'login' %}">
+                <i class="fas fa-sign-in-alt"></i> Faça Login
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Password Strength Indicator
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordInput = document.getElementById('id_password1');
+        const strengthIndicator = document.getElementById('passwordStrength');
+        const strengthBar = strengthIndicator?.querySelector('.password-strength-bar');
+
+        if (passwordInput && strengthIndicator) {
+            passwordInput.addEventListener('input', function() {
+                const password = this.value;
+                const strength = calculatePasswordStrength(password);
+
+                if (password.length > 0) {
+                    strengthIndicator.classList.add('show');
+                    strengthBar.className = 'password-strength-bar ' + strength.class;
+                } else {
+                    strengthIndicator.classList.remove('show');
+                }
+            });
+        }
+
+        function calculatePasswordStrength(password) {
+            let strength = 0;
+            
+            if (password.length >= 8) strength++;
+            if (password.length >= 12) strength++;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+            if (/\d/.test(password)) strength++;
+            if (/[^a-zA-Z\d]/.test(password)) strength++;
+
+            if (strength <= 2) {
+                return { level: 'weak', class: 'strength-weak' };
+            } else if (strength <= 4) {
+                return { level: 'medium', class: 'strength-medium' };
+            } else {
+                return { level: 'strong', class: 'strength-strong' };
+            }
+        }
+
+        // Form Validation
+        const form = document.getElementById('registerForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const password1 = document.getElementById('id_password1');
+                const password2 = document.getElementById('id_password2');
+
+                if (password1 && password2) {
+                    if (password1.value !== password2.value) {
+                        e.preventDefault();
+                        alert('As senhas não coincidem!');
+                        password2.focus();
+                    }
+                }
+            });
+        }
+
+        // Auto-hide messages after 5 seconds
+        const messages = document.querySelectorAll('.alert');
+        messages.forEach(function(message) {
+            setTimeout(function() {
+                message.style.transition = 'opacity 0.5s ease';
+                message.style.opacity = '0';
+                setTimeout(function() {
+                    message.remove();
+                }, 500);
+            }, 5000);
+        });
+    });
+</script>
+{% endblock %}
