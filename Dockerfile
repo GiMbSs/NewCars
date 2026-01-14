@@ -42,9 +42,9 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 # Copy project files
 COPY --chown=django:django . .
 
-# Create directories for static and media files
-RUN mkdir -p /app/staticfiles /app/media && \
-    chown -R django:django /app/staticfiles /app/media
+# Create directories for static, media and logs
+RUN mkdir -p /app/staticfiles /app/media /app/logs && \
+    chown -R django:django /app/staticfiles /app/media /app/logs
 
 # Switch to non-root user
 USER django
