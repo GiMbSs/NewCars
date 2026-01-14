@@ -56,11 +56,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD pgrep -f gunicorn || exit 1
 
-# Entrypoint script
-COPY --chown=django:django docker-entrypoint.sh /docker-entrypoint.sh
-USER root
-RUN chmod +x /docker-entrypoint.sh
-USER django
-
-ENTRYPOINT ["/docker-entrypoint.sh"]
+# Start Gunicorn server
 CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "60", "--access-logfile", "-", "--error-logfile", "-"]
