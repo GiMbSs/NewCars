@@ -18,7 +18,7 @@ class Home(View):
 @method_decorator(staff_member_required(login_url='/usuarios/login/'), name='dispatch')
 class Logs(View):
     def get(self, request, *args, **kwargs):
-        logs_root = Path(settings.BASE_DIR) / 'logs'
+        logs_root = Path(getattr(settings, 'LOGS_ROOT', Path(settings.BASE_DIR) / 'logs'))
         available_dates = []
 
         if logs_root.exists():

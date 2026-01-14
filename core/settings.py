@@ -8,6 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'dev-only')
+LOGS_ROOT = Path(os.getenv('LOGS_DIR', str(BASE_DIR / 'logs')))
 
 
 def getenv_bool(name: str, default: bool = False) -> bool:

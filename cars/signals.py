@@ -74,7 +74,7 @@ def after_car_delete(sender, instance, **kwargs):
     actor = _get_actor(instance)
     save_logs(actor, "Carro deletado", instance)
 
-LOGS_ROOT = Path(settings.BASE_DIR) / 'logs'
+LOGS_ROOT = Path(getattr(settings, 'LOGS_ROOT', Path(settings.BASE_DIR) / 'logs'))
 
 def save_logs(actor, action, instance):
     try:
