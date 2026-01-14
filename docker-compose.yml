@@ -1,0 +1,66 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: newcars_db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-cars}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    networks:
+      - newcars_network
+    restart: unless-stopped
+
+  web:
+    build: .
+    container_name: newcars_web
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             gunicorn core.wsgi:application --bind 0.0.0.0:8000"
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    networks:
+      - newcars_network
+    restart: unless-stopped
+
+  vnc:
+    image: dorowu/ubuntu-desktop-lxde-vnc:focal-arm64
+    container_name: newcars_vnc
+    platform: linux/arm64
+    environment:
+      - VNC_PASSWORD=${VNC_PASSWORD:-vncpass}
+      - USER=root
+      - PASSWORD=${VNC_PASSWORD:-vncpass}
+      - RESOLUTION=1920x1080
+    ports:
+      - "6080:80"      # noVNC - Acesso via navegador
+      - "5900:5900"    # VNC direto
+    volumes:
+      - vnc_home:/home/ubuntu
+      - .:/workspace
+    networks:
+      - newcars_network
+    restart: unless-stopped
+    shm_size: '2gb'
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+  vnc_home:
+
+networks:
+  newcars_network:
+    driver: bridge
