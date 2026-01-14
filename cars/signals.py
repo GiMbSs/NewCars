@@ -2,9 +2,10 @@ from django.contrib.auth import get_user_model
 from django.db.models.signals import pre_save, post_save, post_delete, pre_delete
 from django.dispatch import receiver
 from django.utils.functional import SimpleLazyObject
+from django.conf import settings
+from pathlib import Path
 from .models import Car
 from datetime import datetime
-import os
 from ai_api.client import get_ai_description
 
 UserModel = get_user_model()
@@ -73,13 +74,15 @@ def after_car_delete(sender, instance, **kwargs):
     actor = _get_actor(instance)
     save_logs(actor, "Carro deletado", instance)
 
+LOGS_ROOT = Path(settings.BASE_DIR) / 'logs'
+
 def save_logs(actor, action, instance):
     try:
-        date_path = os.path.join('logs', str(datetime.now().date()))
-        os.makedirs(date_path, exist_ok=True)
-        
-        log_file = os.path.join(date_path, 'cars.log')
-        with open(log_file, 'a', encoding='utf-8') as f:
+        date_path = LOGS_ROOT / str(datetime.now().date())
+        date_path.mkdir(parents=True, exist_ok=True)
+
+        log_file = date_path / 'cars.log'
+        with log_file.open('a', encoding='utf-8') as f:
             timestamp = datetime.now().strftime('%d-%m-%Y %H:%M:%S')
             f.write(f"[{timestamp}] {action} by {actor}: {instance}\n")
     except Exception as e:
