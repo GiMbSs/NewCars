@@ -18,7 +18,7 @@ services:
     build: .
     container_name: newcars_web
     command: >
-      sh -c "mkdir -p ${LOGS_DIR:-/app/logs} &&
+      sh -c "mkdir -p ${LOGS_DIR:-/tmp/newcars_logs} &&
              python manage.py migrate &&
              python manage.py collectstatic --noinput &&
              gunicorn core.wsgi:application --bind 0.0.0.0:8000"
