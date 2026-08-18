@@ -492,10 +492,10 @@
         <div class="car-card-enhanced">
             <div class="car-image-wrapper">
                 {% if car.image %}
-                <img src="{{ car.image.url }}" alt="{{ car.brand }} {{ car.model }}">
+                <img src="{{ car.image.url }}" alt="{{ car.brand }} {{ car.model }}" loading="lazy">
                 {% else %}
                 <img src="https://via.placeholder.com/400x240/004E89/FFFFFF?text={{ car.brand }}+{{ car.model }}" 
-                     alt="{{ car.brand }} {{ car.model }}">
+                     alt="{{ car.brand }} {{ car.model }}" loading="lazy">
                 {% endif %}
                 
                 <span class="car-status {% if not car.is_available %}sold{% endif %}">
@@ -591,26 +591,11 @@
 
 {% block extra_js %}
 <script>
-    // Função para atualizar parâmetros da URL
+    // Função para atualizar parâmetros da URL (usando API nativa)
     function updateURLParameter(url, param, paramVal) {
-        var newAdditionalURL = "";
-        var tempArray = url.split("?");
-        var baseURL = tempArray[0];
-        var additionalURL = tempArray[1];
-        var temp = "";
-        
-        if (additionalURL) {
-            tempArray = additionalURL.split("&");
-            for (var i = 0; i < tempArray.length; i++) {
-                if (tempArray[i].split('=')[0] != param) {
-                    newAdditionalURL += temp + tempArray[i];
-                    temp = "&";
-                }
-            }
-        }
-        
-        var rows_txt = temp + "" + param + "=" + paramVal;
-        return baseURL + "?" + newAdditionalURL + rows_txt;
+        const urlObj = new URL(url, window.location.origin);
+        urlObj.searchParams.set(param, paramVal);
+        return urlObj.toString();
     }
     
     // Smooth scroll para topo ao mudar ordenação
@@ -621,26 +606,28 @@
         });
     });
     
-    // Animação dos cards ao entrar na viewport
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-    
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
+    // Animação dos cards ao entrar na viewport (IIFE para evitar conflito com main.js)
+    (function() {
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('.car-card-enhanced').forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+            observer.observe(card);
         });
-    }, observerOptions);
-    
-    document.querySelectorAll('.car-card-enhanced').forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(30px)';
-        card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
-        observer.observe(card);
-    });
+    })();
 </script>
 {% endblock %}

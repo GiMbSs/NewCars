@@ -538,7 +538,9 @@
                            class="form-control" 
                            placeholder="Digite sua senha"
                            required>
-                    <i class="fas fa-eye password-toggle" id="togglePassword"></i>
+                    <button type="button" class="password-toggle" id="togglePassword" aria-label="Mostrar senha" style="background:none; border:none; cursor:pointer;">
+                        <i class="fas fa-eye"></i>
+                    </button>
                 </div>
                 {% if form.password.errors %}
                 <ul class="errorlist">
@@ -610,8 +612,9 @@
                 passwordInput.setAttribute('type', type);
                 
                 // Toggle icon
-                this.classList.toggle('fa-eye');
-                this.classList.toggle('fa-eye-slash');
+                const icon = this.querySelector('i');
+                icon.classList.toggle('fa-eye');
+                icon.classList.toggle('fa-eye-slash');
             });
         }
 

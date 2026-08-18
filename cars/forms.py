@@ -30,12 +30,12 @@ class CarForm(forms.ModelForm):
         highlighted = cleaned_data.get('highlighted')
         is_available = cleaned_data.get('is_available')
 
-        if is_new and mileage > 0:
+        if is_new and mileage is not None and mileage > 0:
             error_msg = 'Carros novos não podem ter quilometragem maior que zero.'
             self.add_error('mileage', error_msg)
 
-        if factory_year != model_year: 
-            if factory_year < (model_year - 1) or factory_year > (model_year +1):
+        if factory_year is not None and model_year is not None and factory_year != model_year:
+            if factory_year < (model_year - 1) or factory_year > (model_year + 1):
                 error_msg = 'Ano de fabricação e modelo inválidos.'
                 self.add_error('factory_year', error_msg)
                 self.add_error('model_year', error_msg)

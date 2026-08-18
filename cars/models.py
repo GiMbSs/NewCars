@@ -19,7 +19,7 @@ class Car(models.Model):
     model_year = models.PositiveIntegerField(blank=False, null=False, verbose_name='Ano do Modelo')
     color = models.CharField(max_length=50, blank=False, null=False, verbose_name='Cor')
     transmission = models.CharField(max_length=50, default='Manual', blank=False, null=False, verbose_name='Transmissão')
-    mileage = models.PositiveIntegerField(blank=True, null=False, verbose_name='Quilometragem')
+    mileage = models.PositiveIntegerField(blank=True, null=True, default=0, verbose_name='Quilometragem')
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=False, null=False, verbose_name='Preço')
     description = models.TextField(blank=True, null=True, verbose_name='Descrição')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Criado em')
@@ -35,3 +35,9 @@ class Car(models.Model):
     class Meta:
         verbose_name = 'Carro'
         verbose_name_plural = 'Carros'
+        indexes = [
+            models.Index(fields=['is_available'], name='idx_car_available'),
+            models.Index(fields=['brand'], name='idx_car_brand'),
+            models.Index(fields=['-price'], name='idx_car_price_desc'),
+            models.Index(fields=['-model_year'], name='idx_car_year_desc'),
+        ]

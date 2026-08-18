@@ -7,8 +7,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 
-SECRET_KEY = os.getenv('SECRET_KEY', 'dev-only')
+SECRET_KEY = os.getenv('SECRET_KEY')
+if not SECRET_KEY and not os.getenv('DEBUG'):
+    raise ValueError('SECRET_KEY environment variable must be set in production!')
+SECRET_KEY = SECRET_KEY or 'dev-only-insecure-key'
 LOGS_ROOT = Path(os.getenv('LOGS_DIR', str(BASE_DIR / 'logs')))
+LOGS_ROOT.mkdir(parents=True, exist_ok=True)
 
 
 def getenv_bool(name: str, default: bool = False) -> bool:
@@ -36,7 +40,7 @@ def getenv_list(name: str, default=None):
 
 
 DEBUG = getenv_bool('DEBUG', False)
-ALLOWED_HOSTS = getenv_list('ALLOWED_HOSTS', ['localhost', '127.0.0.1'])
+ALLOWED_HOSTS = getenv_list('ALLOWED_HOSTS', ['cars.gndev.online','localhost', '127.0.0.1'])
 # Django 4+/6+: exigir origens explícitas (com esquema) para CSRF quando acessado externamente
 CSRF_TRUSTED_ORIGINS = getenv_list('CSRF_TRUSTED_ORIGINS', [])
 
@@ -86,18 +90,27 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'cars'),
-        'USER': os.getenv('POSTGRES_USER', 'postgres'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'postgres'),
-        # Dentro de containers, a default deve apontar para o serviço 'db'
-        'HOST': os.getenv('POSTGRES_HOST', 'db'),
-        'PORT': os.getenv('POSTGRES_PORT', '5432'),
-        'TIMEZONE': 'America/Sao_Paulo',
+db_engine = os.getenv('DB_ENGINE', '').lower()
+use_sqlite = getenv_bool('USE_SQLITE', DEBUG)
+
+if db_engine == 'sqlite' or (db_engine != 'postgres' and use_sqlite):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('POSTGRES_DB', 'cars'),
+            'USER': os.getenv('POSTGRES_USER', 'postgres'),
+            'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'postgres'),
+            'HOST': os.getenv('POSTGRES_HOST', 'db'),
+            'PORT': os.getenv('POSTGRES_PORT', '5432'),
+        }
+    }
 
 
 # Password validation
@@ -167,6 +180,13 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
+        'file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': str(LOGS_ROOT / 'app.log'),
+            'maxBytes': 5 * 1024 * 1024,
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
     },
     'loggers': {
         'django': {
@@ -177,6 +197,11 @@ LOGGING = {
         'django.request': {
             'handlers': ['console'],
             'level': 'ERROR',
+            'propagate': False,
+        },
+        'app': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
             'propagate': False,
         },
     },

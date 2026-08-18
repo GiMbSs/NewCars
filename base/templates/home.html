@@ -97,7 +97,7 @@
             <div class="car-card">
                 <div class="car-image-container">
                     <img src="{{ car.image.url }}" 
-                         alt="Carro" class="car-image">
+                         alt="{{ car.brand.name }} {{ car.model }}" class="car-image" loading="lazy">
                     {% if car.is_new %}
                     <span class="car-badge">Novo</span>
                     {% else %}

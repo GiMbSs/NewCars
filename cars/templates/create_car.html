@@ -649,23 +649,11 @@ Cadastrar Novo Veículo - NewCars
         }
     });
     
-    // Validação do formulário
+    // Validação do formulário (usando API nativa do navegador)
     document.getElementById('carForm').addEventListener('submit', function(e) {
-        const requiredFields = this.querySelectorAll('[required]');
-        let isValid = true;
-        
-        requiredFields.forEach(field => {
-            if (!field.value.trim()) {
-                isValid = false;
-                field.style.borderColor = '#e74c3c';
-            } else {
-                field.style.borderColor = '';
-            }
-        });
-        
-        if (!isValid) {
+        if (!this.checkValidity()) {
             e.preventDefault();
-            alert('Por favor, preencha todos os campos obrigatórios (*)');
+            this.reportValidity();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     });

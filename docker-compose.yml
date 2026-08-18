@@ -13,6 +13,11 @@ services:
     networks:
       - newcars_network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   web:
     build: .
@@ -23,7 +28,6 @@ services:
              python manage.py collectstatic --noinput &&
              gunicorn core.wsgi:application --bind 0.0.0.0:8000"
     volumes:
-      - .:/app
       - static_volume:/app/staticfiles
       - media_volume:/app/media
     expose:
@@ -33,7 +37,8 @@ services:
     environment:
       LOGS_DIR: /tmp/newcars_logs
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - newcars_network
     restart: unless-stopped

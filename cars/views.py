@@ -71,14 +71,7 @@ class CarDetailView(DetailView):
     template_name = 'car_detail.html'
     context_object_name = 'car'
     pk_url_kwarg = 'car_id'
-
-    def get(self, request, *args, **kwargs):
-        try:
-            self.object = self.get_object()
-        except Http404:
-            return render(request, "404.html", status=404)
-        context = self.get_context_data(object=self.object)
-        return self.render_to_response(context)
+    queryset = Car.objects.select_related('brand')
     
 @method_decorator(staff_member_required(login_url='/usuarios/login/'), name='dispatch')
 class CarCreateView(CreateView):
@@ -106,13 +99,7 @@ class CarUpdateView(UpdateView):
         form.instance._log_user = self.request.user
         return super().form_valid(form)
     
-    def get(self, request, *args, **kwargs):
-        try:
-            self.object = self.get_object()
-        except Http404:
-            return render(request, "404.html", status=404)
-        context = self.get_context_data(object=self.object)
-        return self.render_to_response(context)
+
     
 
 @method_decorator(staff_member_required, name='dispatch')

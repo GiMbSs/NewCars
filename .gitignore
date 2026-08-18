@@ -29,6 +29,7 @@ staticfiles/
 node_modules/
 dist/
 build/
+nginx/nginx.conf
 
 # Env
 .env
